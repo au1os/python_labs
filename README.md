@@ -5,7 +5,7 @@ name = str(input())
 age = int(input())
 print(f'Привет, {name}! Через год тебе будет {age+1}')
 ```
-![Задание1](./Python_labs/images/lab01/01.png)
+![Задание1](./images/lab01/01.png)
 ### Задание 2
 ```python
 value1 = float(input("value1:   "))
