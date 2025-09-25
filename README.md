@@ -5,7 +5,7 @@ name = str(input())
 age = int(input())
 print(f'Привет, {name}! Через год тебе будет {age+1}')
 ```
-![Задание1](.\images\lab01\01.png)
+![Задание1](.\Python_labs\images\lab01\01.png)
 ### Задание 2
 ```python
 value1 = float(input("value1:   "))
@@ -49,6 +49,6 @@ for i in range(n):
     sname, fname, age, problem = map(str, input("in_"+str(i+2)+": ").split()) 
     if problem == "True": och+=1
     else: zaoch += 1
-print(f'out {och} {zaoch}')
+print(f'out: {och} {zaoch}')
 ```
 ![Задание6](.\images\lab01\06.png)
