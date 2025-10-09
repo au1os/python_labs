@@ -2,11 +2,11 @@ def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
     if nums == []: return "ValueError"
     rettuple = min(nums), max(nums)
     return rettuple
-# print(min_max([3, -1, 5, 5, 0]))
-# print(min_max([42]))
-# print(min_max([-5, -2, -9]))
-# print(min_max([]))
-# print(min_max([1.5, 2, 2.0, -3.1]))
+print(min_max([3, -1, 5, 5, 0]))
+print(min_max([42]))
+print(min_max([-5, -2, -9]))
+print(min_max([]))
+print(min_max([1.5, 2, 2.0, -3.1]))
 def unique_sorted(nums: list[float | int]) -> list[float | int]:
    return sorted(set(nums))
 # print(unique_sorted([3, 1, 2, 1, 3]))

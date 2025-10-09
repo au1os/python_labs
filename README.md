@@ -140,6 +140,7 @@ print(col_sums([[1, 2], [3]]))
 ### Задание 3 (tuples.py)
 ```python
 def format_record(rec: tuple[str, str, float]) -> str:
+    if isinstance(rec, tuple) == False: return "TypeError"
     if rec[1]=="" or len(rec)!=3: return "ValueError"
     if rec[0]!=str(rec[0]) or rec[1]!=str(rec[1]) or rec[2]!=float(rec[2]) or len(str(rec[2]))!=len(str(float(rec[2]))): return "TypeError"
     retstr = ""
