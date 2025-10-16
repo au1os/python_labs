@@ -156,3 +156,85 @@ print(format_record(("Петров Пётр Петрович", "IKBO-12", 5.0)))
 print(format_record(("  сидорова  анна   сергеевна ", "ABB-01", 3.999)))
 ```
 ![3](./images/lab02/tuples.png)
+
+## Лабораторная номер 3
+### Задание A
+#### Код
+```python
+import re
+def normalize(text: str, *, casefold: bool = True, yo2e: bool = True) -> str:
+    if casefold == True: text = text.casefold()
+    if yo2e == True: text = text.replace("ё", "е")
+    for space in ['\n', '\t', '\r', '\v', '\f']:
+        text = text.replace(space, ' ')
+    return ' '.join(text.split())
+def tokenize(text: str) -> list[str]:
+    text = normalize(text)
+    return re.findall(r'\w+(?:-\w+)*', text)
+def count_freq(tokens: list[str]) -> dict[str, int]:
+    unique = set(tokens)
+    freq_dict = {}
+    for text in unique:
+        freq_dict [f'{text}'] = tokens.count(text)
+    return freq_dict
+def top_n(freq: dict[str, int], n: int = 5) -> list[tuple[str, int]]:
+    dict_items_sorted = sorted(freq.items(), key=lambda x: (-x[1], x[0]))
+    return dict_items_sorted[:n]
+```
+#### Тест кейсы + контрольные мини-тесты
+```python
+import sys
+import os
+src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, src_root)
+from lib.text import normalize, tokenize, count_freq, top_n
+# normalize
+assert normalize("ПрИвЕт\nМИр\t") == "привет мир"
+assert normalize("ёжик, Ёлка") == "ежик, елка"
+assert normalize("Hello\r\nWorld") == "hello world"
+assert normalize("  двойные   пробелы  ") == "двойные пробелы"
+print("normalize function passed test")
+# tokenize
+assert tokenize("привет, мир!") == ["привет", "мир"]
+assert tokenize("по-настоящему круто") == ["по-настоящему", "круто"]
+assert tokenize("2025 год") == ["2025", "год"]
+assert tokenize("emoji 😀 не слово") == ["emoji", "не", "слово"]
+assert tokenize("hello,world!!!") == ["hello", "world"]
+print("tokenize function passed test")
+# count_freq + top_n
+freq = count_freq(["a","b","a","c","b","a"])
+assert freq == {"a":3, "b":2, "c":1}
+assert top_n(freq, 2) == [("a",3), ("b",2)]
+# тай-брейк по слову при равной частоте
+freq2 = count_freq(["bb","aa","bb","aa","cc"])
+assert top_n(freq2, 2) == [("aa",2), ("bb",2)]
+print("count_freq + top_n functions passed test")
+```
+![tests](./images/lab03/test.png)
+### Задание B
+#### Код
+```python
+import sys
+import os
+src_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, src_root)
+from lib.text import normalize, tokenize, count_freq, top_n
+
+def main():
+    text = sys.stdin.readline().strip()
+    if not text:
+        print('Всего слов: 0')
+        print('Уникальных слов: 0')
+        print('Топ-5:')
+        return
+    
+    print(f'Всего слов: {len(tokenize(text))}')
+    print(f'Уникальных слов: {len(count_freq(tokenize(text)))}')
+    print('Топ-5:')
+    for variable, freq in top_n(count_freq(tokenize(text)), 5):
+        print(f'      {variable}:    {freq}')
+main()
+```
+#### Несколько примеров
+![B-1](./images/lab03/B-1.png)
+![B-2](./images/lab03/B-2.png)
