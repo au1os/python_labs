@@ -252,25 +252,33 @@ main()
 4.Вывод в консоль
 ### Команды запуска
 #### Запуск с параметрами по умолчанию
+```python
 python src/lab04/text_report.py
+```
 #### Запуск с указанием входного файла
+```python
 python src/lab04/text_report.py --in data/lab04/input.txt
+```
 #### Запуска с указанием входного и выходного файлов
+```python
 python src/lab04/text_report.py --in data/lab04/input.txt --out data/lab04/report.csv
+```
 #### Запуск с другой выборочной кодировкой
+```python
 python src/lab04/text_report.py --in data/lab04/input.txt --encoding cp1251
+```
 
 ## Лабораторная номер 5
 ### Команды запуска
 #### Инсталляция
-Python
-
+```python
 pip install openpyxl
+```
 Установка openpyxl
 #### Запуск фунций (методов)
-Python
-
+```python
 python test_lab05.py
+```
 Все тесты были проведены в одном файле для удовства, 
 все ошибки в случае чего будут выведены в терминал
 #### Requirments
