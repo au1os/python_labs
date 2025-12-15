@@ -7,6 +7,7 @@ data = [{"name": "Alice", "age": 22}, {"name": "Bob", "age": 25}]
 
 
 def r_json(path: Path | str) -> any:
+    path = Path(path)
     if not path.exists():
         raise FileNotFoundError("Файл не найден")
     if path.suffix != ".json" or path.stat().st_size == 0:
@@ -18,6 +19,7 @@ def r_json(path: Path | str) -> any:
 
 
 def w_json(data: any, path: Path | str) -> None:
+    path = Path(path)
     if data == None or data == [] or data == "":
         raise ValueError("Нет данных")
     if path.suffix != ".json":
@@ -28,6 +30,7 @@ def w_json(data: any, path: Path | str) -> None:
 
 
 def r_csv(path: Path | str) -> list: #Возвращает список строк из CSV файла
+    path = Path(path)
     if not path.exists():
         raise FileNotFoundError("Файл не найден")
     if path.suffix != ".csv" or path.stat().st_size == 0:
@@ -42,6 +45,7 @@ def r_csv(path: Path | str) -> list: #Возвращает список стро
 
 
 def w_csv(data: list[any], path: str | Path) -> None:
+    path = Path(path)
     if data == None or data == [] or data == "":
         raise ValueError("Нет данных")
     if path.suffix != ".csv":
