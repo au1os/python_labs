@@ -267,6 +267,10 @@ python src/lab04/text_report.py --in data/lab04/input.txt --out data/lab04/repor
 ```python
 python src/lab04/text_report.py --in data/lab04/input.txt --encoding cp1251
 ```
+### Запуски
+![Запуск](./images/lab05/Запуск_A.png)
+![Запуск](./images/lab05/Запуск_B.png)
+![Запуск](./images/lab05/Запуск_C.png)
 
 ## Лабораторная номер 5
 ### Команды запуска
