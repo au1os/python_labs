@@ -1,7 +1,9 @@
 from openpyxl import Workbook
 from pathlib import Path
-import csv
-from f_read_to_write import r_json, r_csv
+import csv, sys
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+from src.lib.f_read_to_write import r_json, r_csv
 
 
 

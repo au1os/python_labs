@@ -268,9 +268,9 @@ python src/lab04/text_report.py --in data/lab04/input.txt --out data/lab04/repor
 python src/lab04/text_report.py --in data/lab04/input.txt --encoding cp1251
 ```
 ### Запуски
-![Запуск](./images/lab05/Запуск_A.png)
-![Запуск](./images/lab05/Запуск_B.png)
-![Запуск](./images/lab05/Запуск_C.png)
+![Запуск](./images/lab04/Запуск_A.png)
+![Запуск](./images/lab04/Запуск_B.png)
+![Запуск](./images/lab04/Запуск_C.png)
 
 ## Лабораторная номер 5
 ### Команды запуска
@@ -316,3 +316,170 @@ python test_lab05.py
 ![csv_to_json](./images/lab05/Результат_csv_to_json.png)
 ![json_to_csv](./images/lab05/Результат_json_to_csv.png)
 ![csv_to_xlsx](./images/lab05/Результат_csv_to_xlsx.png)
+
+## Лабораторная работа 6
+### CLI_text
+#### code
+```python
+import argparse
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.lib.f_read_to_write import r_csv, r_json
+from src.lib.text import top_n, count_freq, tokenize, normalize
+
+
+def absoluting(path: Path | str) -> Path:
+    path = Path(path)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    # if not path.exists():
+    #     raise FileNotFoundError("Файл не найден")
+    return path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+
+def main():
+    parser = argparse.ArgumentParser(description="CLI-утилиты лабораторной №6")
+    subparsers = parser.add_subparsers(dest="command")
+
+    # подкоманда cat
+    cat_parser = subparsers.add_parser("cat", help="Вывести содержимое файла")
+    cat_parser.add_argument("-i", "--input", dest="input_file", required=True, help="Путь входного файла")
+    cat_parser.add_argument("-n", action="store_true", help="Нумеровать строки")
+
+    # подкоманда stats
+    stats_parser = subparsers.add_parser("stats", help="Частоты слов")
+    stats_parser.add_argument("-i", "--input", dest="input_file", required=True, help="Путь входного файла")
+    stats_parser.add_argument("--top", dest="top_n", type=int, default=5, help="вывести топ-X слов по частоте")
+
+    args = parser.parse_args()
+
+    path = Path(args.input_file)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    print(path)
+    # if not path.is_file():
+    #     parser.error(f"Указанный путь {args.input_file} не является файлом")
+
+    if args.command == "cat":
+        if not path.exists():
+            raise FileNotFoundError("Указанный файл не найден")
+        with open(path, "r", encoding="utf-8") as file:
+            data = file.readlines()
+            #print(data)
+            if args.n:
+                for i in range(len(data)):
+                    print(i + 1, data[i], end="")
+            else:
+                for i in range(len(data)):
+                    print(data[i], end="")
+        # else:
+        #     raise ValueError("Недопустимый формат файла")
+
+        # if args.n:
+        #     for i in range(len(data)):
+        #         print(i+1,", ".join(data[i]))
+        # else:
+        #     for i in range(len(data)):
+        #         print(", ".join(data[i]))
+
+    elif args.command == "stats":
+        if not path.exists():
+            raise FileNotFoundError("Указанный файл не найден")
+
+        if path.suffix == ".csv":
+            data = list(list(x.values()) for x in r_csv(path))
+        elif path.suffix == ".json":
+            data = data = list(list(x.values()) for x in r_json(path))
+        elif path.suffix == ".txt":
+            with open(path, "r", encoding="utf-8") as file:
+                data = file.read()
+        else:
+            raise ValueError("Недопустимый формат файла")
+
+        data = top_n(count_freq(tokenize(data)), args.top_n)
+        if len(data) < args.top_n:
+            n = len(data)
+        else:
+            n = args.top_n
+        for num in range(n):
+            print(f'{data[num][0]}: {data[num][1]}')
+
+
+if __name__ == "__main__":
+    main()
+```
+#### scrinshots
+![cat](./images/lab06/cat_command.png)
+![stats](./images/lab06/stats_command.png)
+### CLI_converter
+#### code
+```python
+import argparse
+from pathlib import Path
+import sys
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+from src.lib.json_csv import json_to_csv, csv_to_json
+from src.lib.csv_xlsx import csv_to_xlsx
+
+
+def absoluting(path: Path | str) -> Path:
+    path = Path(path)
+    if not path.is_absolute():
+        path = PROJECT_ROOT / path
+    # if not path.exists():
+    #     raise FileNotFoundError("Файл не найден")
+    return path
+
+def main():
+    parser = argparse.ArgumentParser(description="Конвертеры данных")
+    sub = parser.add_subparsers(dest="cmd")  # по умолчанию активируется при запуске кода. прописывать не нужно
+
+    p1 = sub.add_parser("json2csv", help="конвертация json to csv")  # Необходимо прописывать после импорта файла
+    p1.add_argument("-i","--input",dest="input_file",help="Входной файл .json",required=True,type=str,)
+    p1.add_argument("-o", "--output", dest="output_file", help="Выходной .csv", required=True, type=str,)
+
+    p2 = sub.add_parser("csv2json", help="конвертация csv to json")  # Необходимо прописывать после импорта файла
+    p2.add_argument("-i","--input",dest="input_file",help="входной файл .csv",required=True,type=str,)
+    p2.add_argument("-o","--output",dest="output_file",help="конечный файл .json",required=True,type=str,)
+
+    p3 = sub.add_parser("csv2xlsx", help="конвертация csv to xlsx")  # Необходимо прописывать после импорта файла
+    p3.add_argument("-i","--input",dest="input_file",help="входной файл .csv",required=True,type=str,)
+    p3.add_argument("-o","--output",dest="output_file",help="выходной файл xlsx",required=True,type=str,)
+
+    args = parser.parse_args()
+
+    inf = absoluting(args.output_file)
+    ouf = absoluting(args.input_file)
+
+    if not ouf.is_file():
+        parser.error(f"Указанный путь {ouf} не является файлом")
+
+    if not inf.is_file():
+        parser.error(f"Указанный путь {inf} не является файлом")
+
+    if args.cmd == "json2csv":
+        json_to_csv(absoluting(args.input_file), absoluting(args.output_file))
+
+    if args.cmd == "csv2json":
+        csv_to_json(absoluting(args.input_file), absoluting(args.output_file))
+
+    if args.cmd == "csv2xlsx":
+        csv_to_xlsx(absoluting(args.input_file), absoluting(args.output_file))
+
+
+if __name__ == "__main__":
+    main()
+```
+#### with using terminal
+python cli_convert.py json2csv -i data002/lab005/samples/people.json -o data002/lab005/out/people_from_json.csv
+python cli_convert.py csv2json -i data002/lab005/samples/people.csv -o data002/lab005/out/people_from_csv.json
+python cli_convert.py csv2xlsx -i data002/lab005/samples/people.csv -o data002/lab005/out/people.xlsx
