@@ -483,3 +483,14 @@ if __name__ == "__main__":
 python cli_convert.py json2csv -i data002/lab005/samples/people.json -o data002/lab005/out/people_from_json.csv
 python cli_convert.py csv2json -i data002/lab005/samples/people.csv -o data002/lab005/out/people_from_csv.json
 python cli_convert.py csv2xlsx -i data002/lab005/samples/people.csv -o data002/lab005/out/people.xlsx
+
+## Лабораторная работа 7
+### test_text.py
+```python
+```
+### test_json_csv.py
+```python
+```
+(./images/lab07/pytest-q)
+(./images/lab07/pytest)
+(./images/lab07/black)

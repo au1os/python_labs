@@ -3,7 +3,6 @@ import pytest
 from src.lib.text import count_freq, top_n, normalize, tokenize
 
 
-
 # ----------------------------------> Normalize func. testind
 @pytest.mark.parametrize(
     "source, expected",
