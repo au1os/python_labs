@@ -3,6 +3,7 @@ import sys
 import csv
 from collections import Counter
 import os
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 from src.lib.text import normalize, tokenize

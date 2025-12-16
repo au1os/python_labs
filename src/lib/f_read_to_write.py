@@ -4,8 +4,6 @@ from pathlib import Path
 data = [{"name": "Alice", "age": 22}, {"name": "Bob", "age": 25}]
 
 
-
-
 def r_json(path: Path | str) -> any:
     path = Path(path)
     if not path.exists():
@@ -14,8 +12,6 @@ def r_json(path: Path | str) -> any:
         raise ValueError("Неверный тип файла или файл пуст")
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
-    
-
 
 
 def w_json(data: any, path: Path | str) -> None:
@@ -28,8 +24,7 @@ def w_json(data: any, path: Path | str) -> None:
         json.dump(data, file, ensure_ascii=False, indent=2)
 
 
-
-def r_csv(path: Path | str) -> list: #Возвращает список строк из CSV файла
+def r_csv(path: Path | str) -> list:  # Возвращает список строк из CSV файла
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError("Файл не найден")
@@ -41,7 +36,6 @@ def r_csv(path: Path | str) -> list: #Возвращает список стро
         for row in read:
             answ.append(row)
     return answ
-
 
 
 def w_csv(data: list[any], path: str | Path) -> None:

@@ -3,8 +3,6 @@ from pathlib import Path
 from f_read_to_write import r_csv, w_csv, r_json, w_json
 
 
-
-
 def json_to_csv(json_path: str | Path, csv_path: str | Path) -> None:
     json_path = Path(json_path)
     csv_path = Path(csv_path)
@@ -19,8 +17,6 @@ def json_to_csv(json_path: str | Path, csv_path: str | Path) -> None:
     read_t_json = r_json(json_path)
     w_csv(read_t_json, csv_path)
     print("json_to_csv: Данные записаны")
-
-
 
 
 def csv_to_json(csv_path: str | Path, json_path: str | Path) -> None:

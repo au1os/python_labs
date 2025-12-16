@@ -1,7 +1,8 @@
 from io_txt_csv import read_text, write_csv, frequencies_from_text, sorted_word_counts
 import csv
 from pathlib import Path
-import sys 
+import sys
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 from src.lib.text import text_stats, tokenize, top_n, count_freq

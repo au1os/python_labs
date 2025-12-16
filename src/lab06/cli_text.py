@@ -17,6 +17,7 @@ def absoluting(path: Path | str) -> Path:
     #     raise FileNotFoundError("Файл не найден")
     return path
 
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -55,7 +56,7 @@ def main():
             raise FileNotFoundError("Указанный файл не найден")
         with open(path, "r", encoding="utf-8") as file:
             data = file.readlines()
-            #print(data)
+            # print(data)
             if args.n:
                 for i in range(len(data)):
                     print(i + 1, data[i], end="")

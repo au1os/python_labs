@@ -16,6 +16,7 @@ def absoluting(path: Path | str) -> Path:
     #     raise FileNotFoundError("Файл не найден")
     return path
 
+
 def main():
     parser = argparse.ArgumentParser(description="Конвертеры данных")
     sub = parser.add_subparsers(
