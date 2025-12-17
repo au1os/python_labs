@@ -494,3 +494,188 @@ python cli_convert.py csv2xlsx -i data002/lab005/samples/people.csv -o data002/l
 (./images/lab07/pytest-q)
 (./images/lab07/pytest)
 (./images/lab07/black)
+
+## Лабораторная работа 8
+### models.py
+```python
+from dataclasses import dataclass
+from datetime import date, datetime
+
+
+@dataclass
+class Student:
+
+    fio: str
+    birthdate: str
+    group: str
+    gpa: float
+
+    def __post_init__(self):
+
+        if not self.birthdate or self.birthdate == "" or self.birthdate == None:
+            raise ValueError("Поле birthday не может быть пустым.")
+        if not self.fio or self.fio == "" or self.fio == None:
+            raise ValueError("Поле fio не может быть пустым.")
+        if not self.group or self.group == "" or self.group == None:
+            raise ValueError("Поле group не может быть пустым")
+
+        try:
+
+            life_years = datetime.strptime(self.birthdate, "%d.%m.%Y").date()
+
+            if life_years > date.today():
+                raise ValueError("Вперед в прошлое")
+            if (date.today() - life_years).days / 365 > 120:
+                raise ValueError("Вы существуете?")
+        except ValueError as errors:
+            if "warning: birthdate format might be invalid" in str(errors):
+                raise ValueError(
+                    f"Неверный формат даты: {self.birthdate}. "
+                    f"Ожидается формат DD.MM.YYYY"
+                ) from errors
+
+        if not self.gpa or self.gpa == "" or self.gpa == None:
+            raise ValueError("Поле GPA не должно быть пустым")
+
+        self.gpa = float(self.gpa)
+        if type(self.gpa) != float:
+            raise ValueError("GPA должен быть числом")
+        if not (0 <= self.gpa <= 5):
+            raise ValueError(f"Средний балл должен быть в диапазоне от 0 до 5")
+
+    def age(self) -> int:
+        birth_date = datetime.strptime(self.birthdate, "%d.%m.%Y").date()
+        age = date.today().year - birth_date.year
+        today = date.today()
+
+        if today.month < birth_date.month or (
+            today.month == birth_date.month and today.day < birth_date.day
+        ):
+            age -= 1
+        return age
+
+    def to_dict(self) -> dict:
+        if not self.fio:
+            raise ValueError("Строка fio не должна быть пустой")
+        if not self.group:
+            raise ValueError("Строка group не должна быть пустой")
+        return {
+            "fio": self.fio,
+            "birthdate": self.birthdate,
+            "group": self.group,
+            "gpa": self.gpa,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict):
+        return cls(
+            fio=d["fio"], birthdate=d["birthdate"], group=d["group"], gpa=d["gpa"]
+        )
+
+    def __str__(self):
+        return f"{self.fio}, {self.group}, {self.gpa}"
+
+
+if __name__ == "__main__":
+
+    data = Student(
+        fio="Нормов Норм Нормисов", birthdate="14.14.2000", group="NORM-25-6", gpa=4.3
+    )
+    print(data)
+
+```
+![models1](./images/lab08/models1.png)
+![models2](./images/lab08/models2.png)
+### serialize.py
+```python 
+import json
+from pathlib import Path
+from models import Student
+
+
+def students_to_json(students, path: Path):
+    data = [s.to_dict() for s in students]
+    try:
+        with open(path, "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=2)
+    except IOError as error:
+        raise IOError(f"Ошибка при записи файла: {error}")
+
+
+def students_from_json(path: Path):
+    path = Path(path)
+
+    if path.suffix != ".json":
+        raise TypeError("Неверный формат файла")
+
+    try:
+        with open(path, 'r', encoding="utf-8") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        raise ValueError("Файл не найден")
+
+    if not isinstance(data, list):
+        raise ValueError("Должен быть список в файле")
+
+    students = []
+
+    for item in data:
+        if not isinstance(item, dict):
+            raise ValueError("Файл должен содержать список словарей")
+        student = Student.from_dict(item)
+        students.append(student)
+
+    return students
+
+
+if __name__ == "__main__":
+
+    input_path = "data002/lab08/students_input.json"
+    output_path = "data002/lab08/students_output.json"
+
+    data = students_from_json(input_path)
+    students_to_json(data, output_path)
+
+    for infos in students_from_json(input_path):
+        print(infos)
+
+```
+![seri](./images/lab08/seri.png)
+### JSON_input
+```json
+[
+  {
+    "fio": "Македонский Аленксандр Александрович",
+    "birthdate": "13.12.2005",
+    "group": "BAT-15-3",
+    "gpa": 4.9
+  },
+  {
+    "fio": "Филармонов Алексей Леонидович",
+    "birthdate": "04.05.1990",
+    "group": "BAD-17-5",
+    "gpa": 5.0
+  },
+  {
+    "fio": "Юнга Лев Давыдович",
+    "birthdate": "11.07.2001",
+    "group": "BAT-18-4",
+    "gpa": 3.4
+  },
+  {
+    "fio": "Лейзенбаум Абдурахман Иванович",
+    "birthdate": "30.04.2005",
+    "group": "BAD-32-20",
+    "gpa": 4.3
+  },
+  {
+    "fio": "Действительный Действий Действитович",
+    "birthdate": "12.12.2000",
+    "group": "BAT-17-54",
+    "gpa": 2.0
+  }
+]
+```
+### JSON_output
+Такой же..
+![jsonout](./images/lab08/json_output.png)

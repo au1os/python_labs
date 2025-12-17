@@ -79,6 +79,9 @@ class Student:
 if __name__ == "__main__":
 
     data = Student(
-        fio="Нормов Норм Нормисов", birthdate="14.14.2000", group="NORM-25-6", gpa=4.3
+        fio="Нормов Норм Нормисов", birthdate="14.14.2000", group="NORM-25-6", gpa=5.0
     )
+
+    answ = data.to_dict()
     print(data)
+    print(f"Словарь: {answ}")

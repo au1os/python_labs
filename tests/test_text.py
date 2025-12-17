@@ -31,7 +31,6 @@ def test_normalize_NO_yo2e() -> None:
 # def test_normalize_NO_casefold() -> None:
 #     assert normalize("НунИчЕгОСеБе_ЁмАЁ", casefold=False) == "НунИчЕгОСеБе_ЕмАЕ"
 
-
 # ----------------------------------> Tokenize func. testing
 
 
