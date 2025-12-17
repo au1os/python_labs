@@ -345,7 +345,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CLI-утилиты лабораторной №6")
+    parser = argparse.ArgumentParser(description="CLI")
     subparsers = parser.add_subparsers(dest="command")
 
     # подкоманда cat
@@ -356,7 +356,7 @@ def main():
     # подкоманда stats
     stats_parser = subparsers.add_parser("stats", help="Частоты слов")
     stats_parser.add_argument("-i", "--input", dest="input_file", required=True, help="Путь входного файла")
-    stats_parser.add_argument("--top", dest="top_n", type=int, default=5, help="вывести топ-X слов по частоте")
+    stats_parser.add_argument("--top", dest="top_n", type=int, default=5, help="вывести топ-n слов по частоте")
 
     args = parser.parse_args()
 
@@ -364,30 +364,18 @@ def main():
     if not path.is_absolute():
         path = PROJECT_ROOT / path
     print(path)
-    # if not path.is_file():
-    #     parser.error(f"Указанный путь {args.input_file} не является файлом")
 
     if args.command == "cat":
         if not path.exists():
             raise FileNotFoundError("Указанный файл не найден")
         with open(path, "r", encoding="utf-8") as file:
             data = file.readlines()
-            #print(data)
             if args.n:
                 for i in range(len(data)):
                     print(i + 1, data[i], end="")
             else:
                 for i in range(len(data)):
                     print(data[i], end="")
-        # else:
-        #     raise ValueError("Недопустимый формат файла")
-
-        # if args.n:
-        #     for i in range(len(data)):
-        #         print(i+1,", ".join(data[i]))
-        # else:
-        #     for i in range(len(data)):
-        #         print(", ".join(data[i]))
 
     elif args.command == "stats":
         if not path.exists():
@@ -481,19 +469,356 @@ if __name__ == "__main__":
 ```
 #### with using terminal
 python cli_convert.py json2csv -i data002/lab005/samples/people.json -o data002/lab005/out/people_from_json.csv
+
+
 python cli_convert.py csv2json -i data002/lab005/samples/people.csv -o data002/lab005/out/people_from_csv.json
+
+
 python cli_convert.py csv2xlsx -i data002/lab005/samples/people.csv -o data002/lab005/out/people.xlsx
 
 ## Лабораторная работа 7
 ### test_text.py
 ```python
+import pytest
+
+from src.lib.text import count_freq, top_n, normalize, tokenize
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ("ПрИвЕт\nМИр\t", "привет мир"),
+        ("ёжик, Ёлки", "ежик, елки"),
+        ("HeLlo\r\nWorld", "hello world"),
+        ("  двойные      пробелы     ", "двойные пробелы"),
+        ("", ""),
+        ("\n\r\t", ""),
+        ("123hello", "123hello"),
+        ("123", "123"),
+        ("www ssss", "www ssss"),
+        ("Hi, new user!", "hi, new user!"),
+        ("python_labs", "python_labs"),
+    ],
+)
+def test_normalize_main(source: str, expected: str) -> None:
+    assert normalize(source) == expected
+
+
+def test_normalize_NO_yo2e() -> None:
+    assert normalize("ёжик, Ёлки", yo2e=False) == "ёжик, ёлки"
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ("Дарова      Ворлд", ["дарова", "ворлд"]),
+        ("Hello my      project", ["hello", "my", "project"]),
+        ("my world,Hello!!!!", ["my", "world", "hello"]),
+        ("python_labs saved", ["python_labs", "saved"]),
+        ("привет-пока, -пока-", ["привет-пока", "пока"]),
+        ("hi!\nmi\ttoo.", ["hi", "mi", "too"]),
+        (
+            "7fw38rf3fgw7d_ysdufhsef-ef3 3-ffwsed    ef33_few33232",
+            ["7fw38rf3fgw7d_ysdufhsef-ef3", "3-ffwsed", "ef33_few33232"],
+        ),
+        ("", []),
+        ("%^&*()!@#$", []),
+    ],
+)
+def test_tokenize(source: str, expected: str) -> None:
+    assert tokenize(source) == expected
+
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        # (["a", "a", "you", "you", "b", "b", "YOU"], {'you': 3, 'b': 2, 'a': 2}),
+        # (["Hello"], {'hello': 1}),
+        (
+            [
+                "a",
+                "a",
+                "a",
+                "a",
+                "a",
+                "a",
+                "a",
+            ],
+            {'a': 7},
+        ),
+        (["a", "b", "c", "d", "e"], {'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 1}),
+        # (["12", "211", "12", "A", "a"], {'a': 2, '211': 1, '12': 2}),
+        ([], {}),
+    ],
+)
+def test_count_freq_main(source: str, expected: str) -> None:
+    assert count_freq(source) == expected
+
+@pytest.mark.parametrize(
+    "source, expected",
+    [
+        ({'you': 3, 'b': 2, 'a': 2}, [('you', 3), ('a', 2), ('b', 2)]),
+        ({'hello': 1}, [('hello', 1)]),
+        ({'a': 7}, [('a', 7)]),
+        (
+            {'e': 1, 'd': 1, 'c': 1, 'b': 1, 'a': 1},
+            [('a', 1), ('b', 1), ('c', 1), ('d', 1), ('e', 1)],
+        ),
+        ({'a': 2, '211': 1, '12': 2}, [('12', 2), ('a', 2), ('211', 1)]),
+        ({}, []),
+    ],
+)
+def test_top_n_main(source: str, expected: str) -> None:
+    assert top_n(source) == expected
 ```
 ### test_json_csv.py
 ```python
+import csv
+import json
+from pathlib import Path
+import pytest
+
+from src.lib.json_csv import csv_to_json, json_to_csv
+
+
+def test_json_to_csv_basic(tmp_path: Path):
+    start = tmp_path / "people.json"
+    end = tmp_path / "people.csv"
+
+    data = [
+        {"Name": "Emily", "Surname": "Johnson", "Age": "24"},
+        {"Name": "Daniel", "Surname": "Williams", "Age": "31"},
+    ]
+    start.write_text(json.dumps(data, ensure_ascii=False, indent=3), encoding="utf-8")
+    json_to_csv(start, end)
+
+    with end.open(encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    assert len(rows) == 2
+    assert {"Name", "Surname", "Age"} <= set(rows[0].keys())
+    assert rows[0]["Name"] == "Emily"
+    assert rows[0]["Surname"] == "Johnson"
+    assert rows[0]["Age"] == "24"
+    assert rows[1]["Name"] == "Daniel"
+    assert rows[1]["Surname"] == "Williams"
+    assert rows[1]["Age"] == "31"
+
+
+def test_json_to_csv_file_not_found(tmp_path: Path):
+    src = tmp_path / "nonexistent.json"
+    dst = tmp_path / "output.csv"
+
+    with pytest.raises(FileNotFoundError):
+        json_to_csv(str(src), str(dst))
+
+
+def test_json_to_csv_multiple_fields(tmp_path: Path):
+    src = tmp_path / "data.json"
+    dst = tmp_path / "data.csv"
+
+    data = [
+        {"id": "1", "name": "Olegator", "city": "Moscow", "salary": "54000"},
+        {"id": "2", "name": "Jane", "city": "Paris", "salary": "61200"},
+        {"id": "3", "name": "Jack", "city": "London", "salary": "55300"},
+    ]
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    json_to_csv(str(src), str(dst))
+
+    with dst.open(encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    assert len(rows) == 3
+    assert {"id", "name", "city", "salary"} <= set(rows[0].keys())
+
+
+def test_json_to_csv_cyrillic(tmp_path: Path):
+    src = tmp_path / "russian.json"
+    dst = tmp_path / "russian.csv"
+
+    data = [
+        {"имя": "Алексей", "возраст": "30"},
+        {"имя": "Мария", "возраст": "28"},
+    ]
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    json_to_csv(str(src), str(dst))
+
+    with dst.open(encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    assert len(rows) == 2
+    assert rows[0]["имя"] == "Алексей"
+    assert rows[1]["имя"] == "Мария"
+
+
+def test_json_to_csv_invalid_json(tmp_path: Path):
+    src = tmp_path / "invalid.json"
+    dst = tmp_path / "output.csv"
+
+    src.write_text("{ this is not valid json }", encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        json_to_csv(str(src), str(dst))
+
+
+def test_json_to_csv_empty_file(tmp_path: Path):
+    src = tmp_path / "empty.json"
+    dst = tmp_path / "output.csv"
+
+    src.write_text("[]", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Нет данных"):
+        json_to_csv(str(src), str(dst))
+
+
+# def test_json_to_csv_wrong_extension(tmp_path: Path):
+
+#     src = tmp_path / "empty.txt"
+#     dst = tmp_path / "output.csv"
+
+#     with pytest.raises(TypeError, match="Неверный тип файла"):
+#         json_to_csv(str(src), str(dst))
+
+
+def test_json_to_csv_wrong_csv_extension(tmp_path: Path):
+    src = tmp_path / "file.json"
+    dst = tmp_path / "output.txt"
+
+    src.write_text('[{"name": "test"}]', encoding="utf-8")
+
+    with pytest.raises(TypeError, match="Неверный тип файла"):
+        json_to_csv(str(src), str(dst))
+
+
+def test_json_to_csv_memply(tmp_path: Path):
+    src = tmp_path / "data.json"
+    dst = tmp_path / "data.csv"
+
+    data = []
+    src.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Нет данных"):
+        json_to_csv(str(src), str(dst))
+
+
+def test_csv_to_json_basic(tmp_path: Path):
+
+    src = tmp_path / "people.csv"
+    dst = tmp_path / "people.json"
+
+    with src.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["name", "age"])
+        writer.writeheader()
+        writer.writerow({"name": "Alice", "age": "22"})
+        writer.writerow({"name": "Bob", "age": "25"})
+
+    csv_to_json(str(src), str(dst))
+
+    with dst.open(encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert len(data) == 2
+    assert data[0]["name"] == "Alice"
+    assert data[0]["age"] == "22"
+    assert data[1]["name"] == "Bob"
+    assert data[1]["age"] == "25"
+
+
+def test_csv_to_json_multiple_fields(tmp_path: Path):
+    src = tmp_path / "data.csv"
+    dst = tmp_path / "data.json"
+
+    with src.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["id", "name", "city", "salary"])
+        writer.writeheader()
+        writer.writerow(
+            {"id": "1", "name": "John", "city": "Moscow", "salary": "50000"}
+        )
+        writer.writerow({"id": "2", "name": "Jane", "city": "Paris", "salary": "60000"})
+
+    csv_to_json(str(src), str(dst))
+
+    with dst.open(encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert len(data) == 2
+    assert set(data[0].keys()) == {"id", "name", "city", "salary"}
+
+
+def test_csv_to_json_cyrillic(tmp_path: Path):
+    src = tmp_path / "russian.csv"
+    dst = tmp_path / "russian.json"
+
+    with src.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["имя", "возраст"])
+        writer.writeheader()
+        writer.writerow({"имя": "Алексей", "возраст": "30"})
+        writer.writerow({"имя": "Мария", "возраст": "28"})
+
+    csv_to_json(str(src), str(dst))
+
+    with dst.open(encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert len(data) == 2
+    assert data[0]["имя"] == "Алексей"
+    assert data[1]["имя"] == "Мария"
+
+
+def test_csv_to_json_file_not_found(tmp_path: Path):
+    src = tmp_path / "nonexistent.csv"
+    dst = tmp_path / "output.json"
+
+    with pytest.raises(FileNotFoundError):
+        csv_to_json(str(src), str(dst))
+
+
+def test_csv_to_json_empty_file(tmp_path: Path):
+    src = tmp_path / "empty.csv"
+    dst = tmp_path / "output.json"
+
+    src.write_text("", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="пуст"):
+        csv_to_json(str(src), str(dst))
+
+
+def test_csv_to_json_only_header(tmp_path: Path):
+    src = tmp_path / "header_only.csv"
+    dst = tmp_path / "output.json"
+
+    with src.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["name", "age"])
+        writer.writeheader()
+
+    with pytest.raises(ValueError, match="Нет данных"):
+        csv_to_json(str(src), str(dst))
+
+
+# def test_csv_to_json_wrong_extension(tmp_path: Path):
+
+#     src = tmp_path / "file.txt"
+#     dst = tmp_path / "output.json"
+
+#     with pytest.raises(TypeError, match="Неверный тип файла"):
+#         csv_to_json(str(src), str(dst))
+
+
+def test_csv_to_json_wrong_json_extension(tmp_path: Path):
+    src = tmp_path / "file.csv"
+    dst = tmp_path / "output.txt"
+
+    src.write_text("name,age\ntest,25", encoding="utf-8")
+
+    with pytest.raises(TypeError, match="Неверный тип файла"):
+        csv_to_json(str(src), str(dst))
+
 ```
-(./images/lab07/pytest-q)
-(./images/lab07/pytest)
-(./images/lab07/black)
+![pytest-q](./images/lab07/pytest-q.png)
+![pytest](./images/lab07/full_tests.png)
+![black](./images/lab07/black.png)
 
 ## Лабораторная работа 8
 ### models.py
@@ -679,3 +1004,120 @@ if __name__ == "__main__":
 ### JSON_output
 Такой же..
 ![jsonout](./images/lab08/json_output.png)
+
+## Лабораторная работа 9
+### group.py
+```python
+from pathlib import Path
+from dataclasses import dataclass
+from lib.text import normalize
+from lib.f_read_to_write import r_csv
+from lab08.models import Student
+import csv
+
+@dataclass
+class Group:
+    head=["fio", "birthdate", "group", "gpa"]
+    path: Path
+    def _ensure_storage_exists(self):
+        self.path.write_text("", encoding="utf-8",newline="")
+        with self.path.open("w",encoding="utf-8",newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(self.head)
+
+    def __init__(self, storage_path: str):
+        try:
+            self.path = Path(storage_path)
+        except:
+            raise ValueError(" -- Path Error")
+        if not self.path.exists():
+            self._ensure_storage_exists()
+            print(" -- no headers")
+
+    def _read_all(self):
+        all=r_csv(self.path)
+        group=[]
+        for student in all:
+            group.append(Student.from_dict(student))
+        return group
+
+    def list(self):
+        return self._read_all()
+
+    def add(self, student: Student):
+        with open(self.path, "a",encoding="utf-8",newline="") as file:
+            writer=csv.writer(file)
+            writer.writerow([student.fio,student.birthdate,student.group,student.gpa])
+        return f"{student.fio} -- appended"
+
+    def find(self, substr: str):
+        rows=[]
+        substr=normalize(substr).title()
+        for student in self._read_all():
+            rows.append(Student.to_dict(student))
+        find_s=[r for r in rows if substr in r["fio"]] 
+        if find_s==[]:
+            return f"{substr} -- unfound"
+        else:
+            return find_s
+
+    def remove(self, fio: str):
+        if self.find(fio) ==  f"{fio} -- unfound":
+            return f"{fio} -- unfound"
+        else: fio = self.find(fio)[0]["fio"]
+        students=self._read_all()
+        clean_file=[r for r in students if r.fio != fio] 
+        with open(self.path, "w",encoding="utf-8",newline="") as file:
+            writer=csv.writer(file)
+            writer.writerow(self.head)
+            for student in clean_file:
+                writer.writerow([student.fio,student.birthdate,student.group,student.gpa])
+        return f"{fio} -- deleted"
+
+    def update(self, fio: str, **fields):
+        if self.find(fio) ==  f"{fio} -- unfound":
+            return f"{fio} -- unfound"
+        else: fio = self.find(fio)[0]["fio"]
+        students=self._read_all()
+        for s in students:
+            if s.fio==fio:
+                for key, data in fields.items():
+                    setattr(s,key,data) #key from data to student
+                break
+        with open(self.path, "w",encoding="utf-8",newline="") as file:
+            writer=csv.writer(file)
+            writer.writerow(self.head)
+            for student in students:
+                writer.writerow([student.fio,student.birthdate,student.group,student.gpa])
+        return f"{list(fields.keys()), fio} -- info is changed"
+
+if __name__ == "__main__":
+    student=Student(
+        fio = "Нормов Норм Нормисов",
+        birthdate = "16.09.2000",
+        group = "NORM-25-6",
+        gpa = 4.0
+    )
+    group=Group("data002/lab09/students.csv")
+
+    print("Check list()")
+    print(group.list(), "\n")
+    print("Check _read_all()")
+    print(group._read_all(), "\n")
+    print(group.add(student=student), "\n")
+    print("Check find()")
+    print(group.find("Македонский Аленксандр Александрович"), "\n")
+    print("Check remove()")
+    print(group.remove("Македонский Аленксандр Александрович"), "\n")
+    print("Check update()")
+    print(group.update("Адекватный Адекват Адекватович",group = "BODD-14-33"))
+```
+### Проверка реализации методов
+#### Проверка проводилась на данных из ЛР8 students_output.json, конвертированных в students.csv
+```python 
+from lib.json_csv import json_to_csv
+json_to_csv("data002/lab08/students_output.json", "data002/lab09/students.csv")
+```
+![students](./images/lab09/ishodnik.png)
+#### Проверка
+![check](./images/lab09/main_func.png)
